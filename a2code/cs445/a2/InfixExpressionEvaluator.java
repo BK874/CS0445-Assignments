@@ -2,6 +2,7 @@ package cs445.a2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.EmptyStackException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
@@ -147,8 +148,22 @@ public class InfixExpressionEvaluator {
     void processOperator(char operator) {
 	while(!operators.isEmpty() && operators.peek() != '(' && operators.peek() != '[' &&  prec(operator) <= prec(operators.peek())){
 	    char topOperator = operators.pop();
-	    double operandTwo = operands.pop();
-	    double operandOne = operands.pop();
+	    double operandTwo;
+	    double operandOne;
+	    try{
+		operandTwo = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
+	    try{
+		operandOne = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
 	    double result;
 	    switch (topOperator) {
 	    case '+':
@@ -161,6 +176,9 @@ public class InfixExpressionEvaluator {
 		result = operandOne * operandTwo;
 		break;
 	    case '/':
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}
 		result = operandOne / operandTwo;
 		break;
 	    case '^':
@@ -177,6 +195,12 @@ public class InfixExpressionEvaluator {
 		break;
 	    }
 	    operands.push(result);
+	}
+	if(!operators.isEmpty()){
+	    if(operators.peek() == '(' || operators.peek() == '['){
+		throw new ExpressionError("Open bracket " + operators.peek() +
+					  " followed by operator " + operator);
+	    }
 	}
 	operators.push(operator);
     }
@@ -209,6 +233,9 @@ public class InfixExpressionEvaluator {
 		break;
 	    case '/':
 		result = operandOne / operandTwo;
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}		
 		break;
 	    case '^':
 		if(operandTwo == 0){
@@ -241,8 +268,22 @@ public class InfixExpressionEvaluator {
     void processRemainingOperators() {
 	while(!operators.isEmpty()){
 	    char topOperator = operators.pop();
-	    double operandTwo = operands.pop();
-	    double operandOne = operands.pop();
+	    double operandTwo;
+	    double operandOne;
+	    try{
+		operandTwo = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
+	    try{
+		operandOne = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
 	    double result;
 	    switch (topOperator) {
 	    case '+':
@@ -256,6 +297,9 @@ public class InfixExpressionEvaluator {
 		break;
 	    case '/':
 		result = operandOne / operandTwo;
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}		
 		break;
 	    case '^':
 		if(operandTwo == 0){
@@ -269,6 +313,9 @@ public class InfixExpressionEvaluator {
 	    default:
 		result = 0.0;
 		break;
+	    }
+	    if(!operands.isEmpty()){
+		throw new ExpressionError("Too many operands provided.");
 	    }
 	    operands.push(result);
 	}
