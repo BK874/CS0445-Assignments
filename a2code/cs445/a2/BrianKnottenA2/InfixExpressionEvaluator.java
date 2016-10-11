@@ -102,7 +102,7 @@ public class InfixExpressionEvaluator {
                     processOpenBracket((char)tokenizer.ttype);
                     break;
                 case ')':
-                case ']':
+	    case ']':
                     // If the token is close bracket, process it as such. Forms
                     // of bracket are interchangeable but must nest properly.
                     processCloseBracket((char)tokenizer.ttype);
@@ -196,12 +196,12 @@ public class InfixExpressionEvaluator {
 	    }
 	    operands.push(result);
 	}
-	if(!operators.isEmpty()){
+	/*if(!operators.isEmpty()){
 	    if(operators.peek() == '(' || operators.peek() == '['){
 		throw new ExpressionError("Open bracket " + operators.peek() +
 					  " followed by operator " + operator);
-	    }
-	}
+	  }
+	  }*/
 	operators.push(operator);
     }
 
