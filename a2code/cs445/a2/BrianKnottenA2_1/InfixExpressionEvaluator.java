@@ -1,4 +1,4 @@
-package BrianKnottenA2;
+package BrianKnottenA2_1;
 
 import java.io.BufferedReader;
 import java.io.IOException;
