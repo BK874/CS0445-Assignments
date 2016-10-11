@@ -196,12 +196,6 @@ public class InfixExpressionEvaluator {
 	    }
 	    operands.push(result);
 	}
-	/*if(!operators.isEmpty()){
-	    if(operators.peek() == '(' || operators.peek() == '['){
-		throw new ExpressionError("Open bracket " + operators.peek() +
-					  " followed by operator " + operator);
-	  }
-	  }*/
 	operators.push(operator);
     }
 
