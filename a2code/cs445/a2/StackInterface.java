@@ -1,4 +1,4 @@
-package cs445.a2;
+package BrianKnottenA2;
 
 /**
  * An interface for the ADT stack.
