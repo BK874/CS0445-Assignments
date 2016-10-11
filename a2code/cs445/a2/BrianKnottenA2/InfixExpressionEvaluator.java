@@ -1,7 +1,8 @@
-package cs445.a2;
+package BrianKnottenA2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.EmptyStackException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
@@ -145,12 +146,26 @@ public class InfixExpressionEvaluator {
      * Processes an operator.
      */
     void processOperator(char operator) {
-	while(!operators.isEmpty() && prec(operator) <= prec(operators.peek())){
+	while(!operators.isEmpty() && operators.peek() != '(' && operators.peek() != '[' &&  prec(operator) <= prec(operators.peek())){
 	    char topOperator = operators.pop();
-	    double operandTwo = operands.pop();
-	    double operandOne = operands.pop();
+	    double operandTwo;
+	    double operandOne;
+	    try{
+		operandTwo = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
+	    try{
+		operandOne = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
 	    double result;
-	    switch (operator) {
+	    switch (topOperator) {
 	    case '+':
 		result = operandOne + operandTwo;
 		break;
@@ -161,6 +176,9 @@ public class InfixExpressionEvaluator {
 		result = operandOne * operandTwo;
 		break;
 	    case '/':
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}
 		result = operandOne / operandTwo;
 		break;
 	    case '^':
@@ -177,6 +195,12 @@ public class InfixExpressionEvaluator {
 		break;
 	    }
 	    operands.push(result);
+	}
+	if(!operators.isEmpty()){
+	    if(operators.peek() == '(' || operators.peek() == '['){
+		throw new ExpressionError("Open bracket " + operators.peek() +
+					  " followed by operator " + operator);
+	    }
 	}
 	operators.push(operator);
     }
@@ -197,7 +221,7 @@ public class InfixExpressionEvaluator {
 	   double  operandTwo = operands.pop();
 	   double operandOne = operands.pop();
 	   double result;
-	   switch (closeBracket) {
+	   switch (topOperator) {
 	   case '+':
 		result = operandOne + operandTwo;
 		break;
@@ -209,6 +233,9 @@ public class InfixExpressionEvaluator {
 		break;
 	    case '/':
 		result = operandOne / operandTwo;
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}		
 		break;
 	    case '^':
 		if(operandTwo == 0){
@@ -226,6 +253,13 @@ public class InfixExpressionEvaluator {
 	   operands.push(result);
 	   topOperator = operators.pop();
 	}
+	if(topOperator == '(' && closeBracket == ']'){
+	    throw new ExpressionError("Mismatched brackets: " +
+				      topOperator + " and " + closeBracket);
+	}else if(topOperator == '[' && closeBracket == ')'){
+	    throw new ExpressionError("Mismatched brackets: " +
+				      topOperator + " and " + closeBracket);
+	}
     }
 
     /**
@@ -234,8 +268,22 @@ public class InfixExpressionEvaluator {
     void processRemainingOperators() {
 	while(!operators.isEmpty()){
 	    char topOperator = operators.pop();
-	    double operandTwo = operands.pop();
-	    double operandOne = operands.pop();
+	    double operandTwo;
+	    double operandOne;
+	    try{
+		operandTwo = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
+	    try{
+		operandOne = operands.pop();
+	    }catch(EmptyStackException e){
+		throw new ExpressionError("Operator " + topOperator +
+					  " provided without " +
+					  "appropriate operands.");
+	    }
 	    double result;
 	    switch (topOperator) {
 	    case '+':
@@ -249,6 +297,9 @@ public class InfixExpressionEvaluator {
 		break;
 	    case '/':
 		result = operandOne / operandTwo;
+		if(operandTwo == 0){
+		    throw new ExpressionError("Divide-by-zero");
+		}		
 		break;
 	    case '^':
 		if(operandTwo == 0){
@@ -263,15 +314,18 @@ public class InfixExpressionEvaluator {
 		result = 0.0;
 		break;
 	    }
-	    operands.push(result);	    
+	    if(!operands.isEmpty()){
+		throw new ExpressionError("Too many operands provided.");
+	    }
+	    operands.push(result);
 	}
     }
 	int prec(char operator){
-	int num = 0;
+	int num = 3;
 	if(operator == '*' || operator == '/'){
-	    num = 1;
-	}else if(operator == '+' || operator == '-'){
 	    num = 2;
+	}else if(operator == '+' || operator == '-'){
+	    num = 1;
 	}
 	return num;
     }
